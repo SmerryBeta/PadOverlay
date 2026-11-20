@@ -1,0 +1,89 @@
+# drawn_pad 图片皮肤布局 — 与 gen_drawn_pad_skin.py 锚点一致
+
+canvas:
+  w: 520
+  h: 300
+
+parts:
+  lt:
+    type: bumper
+    x: 161.0
+    y: 35.0
+    w: 62
+    h: 20
+    label: LT
+  rt:
+    type: bumper
+    x: 296.0
+    y: 34.0
+    w: 62
+    h: 20
+    label: RT
+  lb:
+    type: bumper
+    x: 160.0
+    y: 55.0
+    w: 62
+    h: 16
+    label: LB
+  rb:
+    type: bumper
+    x: 296.0
+    y: 55.0
+    w: 62
+    h: 16
+    label: RB
+  btn_y:
+    type: face
+    x: 350.0
+    y: 91.0
+    r: 13
+    label: Y
+  btn_x:
+    type: face
+    x: 325.0
+    y: 114.0
+    r: 13
+    label: X
+  btn_b:
+    type: face
+    x: 375.0
+    y: 114.0
+    r: 13
+    label: B
+  btn_a:
+    type: face
+    x: 349.0
+    y: 139.0
+    r: 13
+    label: A
+  btn_view:
+    type: small
+    x: 238.0
+    y: 150.0
+    r: 8
+  btn_menu:
+    type: small
+    x: 285.0
+    y: 149.0
+    r: 8
+  guide:
+    type: guide
+    x: 260
+    y: 178
+    r: 11
+  ls:
+    type: stick
+    x: 164.0
+    y: 124.0
+    r: 30
+  rs:
+    type: stick
+    x: 347.0
+    y: 192.0
+    r: 30
+  dpad:
+    type: dpad
+    x: 158.0
+    y: 201.0
+    arm: 20

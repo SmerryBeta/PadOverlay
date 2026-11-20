@@ -1,0 +1,12 @@
+name: 图片皮肤模板
+mode: image
+base: base.png
+active_dir: active
+inactive_dir: inactive
+# 把本文件夹复制改名放到 skins/ 下即可
+# active/ inactive/ 内按部件 id 放同名 png，例如：
+#   btn_a.png  btn_b.png  btn_x.png  btn_y.png
+#   lt.png  lb.png  rt.png  rb.png
+#   btn_view.png  btn_menu.png
+#   ls.png  rs.png
+#   dpad_up.png dpad_down.png dpad_left.png dpad_right.png

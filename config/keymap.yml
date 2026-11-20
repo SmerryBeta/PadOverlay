@@ -1,0 +1,59 @@
+# PadOverlay 键位映射（物理键 → 手柄部件）
+# 与《猛兽派对》默认键位同步；由设置界面写入；也可手改后重启或点保存热加载。
+# 鼠标移动始终驱动右摇杆（镜头 / 表情·动作轮盘选向；Windows 用 Raw Input）。
+
+keys:
+  # 移动
+  w:
+  - ls_up
+  s:
+  - ls_down
+  a:
+  - ls_left
+  d:
+  - ls_right
+  # 奔跑 → LT
+  left shift:
+  - lt
+  shift:
+  - lt
+  # 抓取 → RT（左键按住 / I）；丢武器 F 也亮 RT
+  i:
+  - rt
+  f:
+  - rt
+  mouse_left:
+  - btn_x
+  - rt
+  # 跳跃 → Y
+  space:
+  - btn_y
+  # 轻拳/重拳/投掷 → X（出拳 R 保留）
+  r:
+  - btn_x
+  # 脚踢 → A
+  k:
+  - btn_a
+  mouse_right:
+  - btn_a
+  # 头槌 → B
+  l:
+  - btn_b
+  mouse_middle:
+  - btn_b
+  # 镜头左右 → 右摇杆（上下靠鼠标；轮盘时整圈跟鼠标）
+  q:
+  - rs_left
+  e:
+  - rs_right
+  # 积分板 → Menu
+  tab:
+  - btn_menu
+  # 表情轮盘 → 十字右；动作轮盘 → 十字左（按住时鼠标推右摇杆）
+  t:
+  - dpad_right
+  g:
+  - dpad_left
+  # 钓鱼轮盘 → LB
+  c:
+  - lb

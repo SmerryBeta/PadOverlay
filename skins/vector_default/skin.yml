@@ -1,0 +1,3 @@
+name: 矢量默认
+mode: vector
+# mode=vector 时用手绘线稿，不需要 base/active/inactive 图片

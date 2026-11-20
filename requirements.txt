@@ -1,0 +1,4 @@
+PyQt5==5.15.11
+keyboard==0.13.5
+pynput==1.8.1
+PyYAML==6.0.3

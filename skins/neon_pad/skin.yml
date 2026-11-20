@@ -1,0 +1,5 @@
+name: Neon Pad
+mode: image
+base: base.png
+active_dir: active
+inactive_dir: inactive

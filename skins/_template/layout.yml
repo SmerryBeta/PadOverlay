@@ -1,0 +1,22 @@
+# 与 vector_default 相同结构；x/y 为图片绘制锚点
+# bumper: 左上角 + w/h；face/small/stick: 中心 + r；dpad: 中心 + arm
+
+canvas:
+  w: 520
+  h: 300
+
+parts:
+  lt:    {type: bumper, x: 118, y: 12,  w: 62, h: 20, label: LT}
+  rt:    {type: bumper, x: 340, y: 12,  w: 62, h: 20, label: RT}
+  lb:    {type: bumper, x: 168, y: 48,  w: 62, h: 16, label: LB}
+  rb:    {type: bumper, x: 290, y: 48,  w: 62, h: 16, label: RB}
+  btn_y: {type: face, x: 352, y: 104, r: 13, label: Y}
+  btn_x: {type: face, x: 326, y: 130, r: 13, label: X}
+  btn_b: {type: face, x: 378, y: 130, r: 13, label: B}
+  btn_a: {type: face, x: 352, y: 156, r: 13, label: A}
+  btn_view: {type: small, x: 238, y: 152, r: 8}
+  btn_menu: {type: small, x: 282, y: 152, r: 8}
+  guide:    {type: guide, x: 260, y: 178, r: 11}
+  ls:   {type: stick, x: 168, y: 130, r: 30}
+  rs:   {type: stick, x: 352, y: 210, r: 30}
+  dpad: {type: dpad,  x: 168, y: 210, arm: 20}

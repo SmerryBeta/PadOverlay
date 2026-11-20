@@ -1,12 +1,12 @@
 """悬浮窗缩放与位置持久化。"""
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any, Dict, Tuple
 
 import yaml
 
-ROOT = Path(__file__).resolve().parent.parent
+from app_paths import ROOT
+
 PREFS_PATH = ROOT / "config" / "window.yml"
 
 DEFAULTS: Dict[str, Any] = {

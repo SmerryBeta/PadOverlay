@@ -5,12 +5,14 @@ import math
 from threading import Lock
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
-# 越大跟手越快；约 10~16 比较丝滑
-STICK_SMOOTH_SPEED = 14.0
+# 越大跟手越快；约 10~16 比较丝滑（略降以减轻右摇杆肉眼抖动）
+STICK_SMOOTH_SPEED = 10.0
 STICK_SNAP_EPS = 0.004
-# 鼠标停下后右摇杆回中速度
-RS_MOUSE_DECAY = 10.0
-RS_MOUSE_IDLE_EPS = 0.03
+# 鼠标停下后右摇杆回中速度（过快会和下一帧输入对拉成「震动」）
+RS_MOUSE_DECAY = 6.5
+RS_MOUSE_IDLE_EPS = 0.04
+# 新鼠标样本混入比例；过大易抖，过小发黏
+RS_MOUSE_BLEND = 0.42
 
 
 class PadState:
@@ -51,7 +53,7 @@ class PadState:
         """
         鼠标驱动右摇杆。传 (None, None) 或 x=None 清除覆盖。
         坐标系：x 右为正，y 下为正（与屏幕一致）。
-        同向取更大偏转、反向直接覆盖，避免小 delta 把摇杆拉回。
+        用 EMA 混入，避免多路小抖动把摇杆抽成震动。
         """
         with self._lock:
             if x is None:
@@ -62,11 +64,15 @@ class PadState:
             if self._rs_mouse is None:
                 self._rs_mouse = [nx, ny]
                 return
+            a = RS_MOUSE_BLEND
+            self._rs_mouse[0] = self._rs_mouse[0] * (1.0 - a) + nx * a
+            self._rs_mouse[1] = self._rs_mouse[1] * (1.0 - a) + ny * a
+            # 同向加速：略抬一点跟手，但不瞬切满偏
             cx, cy = self._rs_mouse
-            if nx != 0.0 and (cx * nx <= 0 or abs(nx) >= abs(cx)):
-                self._rs_mouse[0] = nx
-            if ny != 0.0 and (cy * ny <= 0 or abs(ny) >= abs(cy)):
-                self._rs_mouse[1] = ny
+            if nx * cx > 0 and abs(nx) > abs(cx):
+                self._rs_mouse[0] = cx * 0.65 + nx * 0.35
+            if ny * cy > 0 and abs(ny) > abs(cy):
+                self._rs_mouse[1] = cy * 0.65 + ny * 0.35
 
     def active(self) -> Set[str]:
         with self._lock:

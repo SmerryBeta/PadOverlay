@@ -6,7 +6,8 @@ from typing import Dict, List, Optional
 
 import yaml
 
-ROOT = Path(__file__).resolve().parent.parent
+from app_paths import ROOT
+
 DEFAULT_KEYMAP = ROOT / "config" / "keymap.yml"
 
 # 设置界面可点选的部件（显示名）

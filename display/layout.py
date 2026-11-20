@@ -8,7 +8,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import yaml
 
-ROOT = Path(__file__).resolve().parent.parent
+from app_paths import ROOT
+
 # 兼容旧路径；优先使用当前皮肤目录下的 layout.yml
 LEGACY_LAYOUT = ROOT / "config" / "layout.yml"
 

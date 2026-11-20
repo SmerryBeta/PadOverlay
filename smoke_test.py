@@ -16,7 +16,7 @@ from display.overlay import OverlayWindow
 from listen.input_hook import InputHook
 from mapping.mapper import KeyMapper
 from mapping.pad_state import PadState
-from ui.tray import make_tray_icon
+from ui.app_icon import make_app_icon
 
 
 def main() -> None:
@@ -46,7 +46,7 @@ def main() -> None:
     ov.set_mouse_poll(hook.poll_cursor)
     hook.poll_cursor()
     hook.stop()
-    assert not make_tray_icon().isNull()
+    assert not make_app_icon().isNull()
     QTimer.singleShot(250, app.quit)
     app.exec_()
     print("SMOKE_OK")

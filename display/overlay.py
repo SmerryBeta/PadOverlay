@@ -66,9 +66,15 @@ class OverlayWindow(QWidget):
         self._persist_timer.setSingleShot(True)
         self._persist_timer.timeout.connect(self._persist_now)
 
+        # 不用 Qt.Tool：Tool 窗不会进 Alt+Tab / 任务栏，直播姬「窗口素材」也枚举不到。
+        # 用普通置顶无边框窗 + 明确标题，方便 OBS / 直播姬按名选择。
+        self.setWindowTitle("PadOverlay")
         self.setWindowFlags(
-            Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool
+            Qt.Window | Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint
         )
+        from ui.app_icon import make_app_icon
+
+        self.setWindowIcon(make_app_icon())
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setMouseTracking(True)
         self.setAttribute(Qt.WA_Hover, True)
@@ -77,7 +83,9 @@ class OverlayWindow(QWidget):
         self._btn_settings = self._make_btn("⚙", "映射设置")
         self._btn_settings.clicked.connect(self.settings_requested.emit)
         self._btn_close = self._make_btn("✕", "退出程序")
+        # clicked + pressed：分层窗上偶发点不中时仍能退出
         self._btn_close.clicked.connect(self.close_requested.emit)
+        self._btn_close.pressed.connect(self.close_requested.emit)
         self._set_top_chrome_visible(False)
 
         prefs = load_prefs()
@@ -303,6 +311,10 @@ class OverlayWindow(QWidget):
         if event.button() != Qt.LeftButton:
             return
         self._refresh_chrome()
+        # 点在设置/关闭上时不要开拖动，避免吞掉退出点击
+        for b in (self._btn_close, self._btn_settings):
+            if b.isVisible() and b.geometry().contains(event.pos()):
+                return
         if self._grip_rect().contains(event.pos()):
             self._resizing = True
             self._resize_origin = event.globalPos()
@@ -346,16 +358,14 @@ class OverlayWindow(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing, True)
 
-        # chrome 热区需要极低 alpha 才能命中；图片皮肤底板自带 alpha，勿整块铺黑底
-        # （否则会透过软边/开孔露出脏边，像狗啃）
+        # 分层窗要 alpha>0 才能点到；chrome 悬停靠 QCursor 轮询，不必常驻铺黑底
+        # （右上/底部 HIT 矩形在游戏画面上会看成半透明黑块）
         hit = QColor(0, 0, 0, HIT_ALPHA)
         from display.skin import get_skin
 
         sk = get_skin()
         if sk.mode != "image" or sk.base is None:
             painter.fillRect(QRectF(self._pad_hit_rect()), hit)
-        painter.fillRect(QRectF(self._top_chrome_rect()), hit)
-        painter.fillRect(QRectF(self._bottom_chrome_rect()), hit)
 
         painter.save()
         painter.translate(PAD, PAD + TOP_BAR)

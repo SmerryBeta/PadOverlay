@@ -8,7 +8,8 @@ from typing import Dict, List, Optional
 import yaml
 from PyQt5.QtGui import QImage, qAlpha, qBlue, qGreen, qRed
 
-ROOT = Path(__file__).resolve().parent.parent
+from app_paths import ROOT
+
 SKINS_DIR = ROOT / "skins"
 
 

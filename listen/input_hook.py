@@ -36,9 +36,12 @@ _MOUSE_NAMES = {
 }
 
 # 相对位移多少 ≈ 右摇杆满偏；越小越灵敏
-_RS_SENS = 2.5
-# Raw 在近期有数据时，忽略光标差分，避免双计
-_RAW_PRIORITY_S = 0.08
+_RS_SENS = 3.2
+# 小于此像素/raw 单位的抖动直接丢掉
+_RS_DEADZONE = 1.0
+# 多路输入互斥：近期有更高优先级源时，低优先级只同步坐标不推摇杆
+_RAW_PRIORITY_S = 0.10
+_HOOK_PRIORITY_S = 0.06
 
 
 class InputHook:
@@ -70,6 +73,7 @@ class InputHook:
         self._capture: Optional[Callable[[str], None]] = None
         self._last_mouse: Optional[Tuple[float, float]] = None
         self._raw_until = 0.0
+        self._hook_until = 0.0
 
     def set_keymap(self, keymap: Dict[str, List[str]]) -> None:
         held = list(self._held_keys)
@@ -113,43 +117,64 @@ class InputHook:
         self._last_mouse = self._read_cursor()
 
     def stop(self) -> None:
+        """释放钩子；可能阻塞，调用方宜放后台线程并加超时。"""
         if self._on_rs_mouse is not None:
-            self._on_rs_mouse(None, None)
-        self._last_mouse = None
-        if self._raw_mouse is not None:
             try:
-                self._raw_mouse.stop()
+                self._on_rs_mouse(None, None)
             except Exception:
                 pass
-            self._raw_mouse = None
-        if keyboard is not None and self._kb_hook is not None:
+        self._last_mouse = None
+        raw = self._raw_mouse
+        self._raw_mouse = None
+        if raw is not None:
             try:
-                keyboard.unhook(self._kb_hook)
+                raw.stop()
+            except Exception:
+                pass
+        kb = self._kb_hook
+        self._kb_hook = None
+        if keyboard is not None and kb is not None:
+            try:
+                keyboard.unhook(kb)
             except Exception:
                 try:
                     keyboard.unhook_all()
                 except Exception:
                     pass
-            self._kb_hook = None
-        if self._mouse_listener is not None:
+        listener = self._mouse_listener
+        self._mouse_listener = None
+        if listener is not None:
             try:
-                self._mouse_listener.stop()
+                listener.stop()
             except Exception:
                 pass
-            self._mouse_listener = None
+
+    def stop_async(self, timeout: float = 1.2) -> None:
+        """在守护线程里 stop，避免 pynput/keyboard 卡死 UI 退出。"""
+        import threading
+
+        done = threading.Event()
+
+        def _run() -> None:
+            try:
+                self.stop()
+            finally:
+                done.set()
+
+        threading.Thread(target=_run, name="hook-stop", daemon=True).start()
+        done.wait(timeout=timeout)
 
     def poll_cursor(self) -> None:
-        """由悬浮窗定时器调用：轮询 OS 光标位置差分。"""
+        """由悬浮窗定时器调用：仅在钩子/Raw 静默时作兜底，避免与钩子双计导致抖动。"""
         if self._on_rs_mouse is None:
             return
-        if time.perf_counter() < self._raw_until:
-            # Raw 活跃时只同步坐标，不重复推摇杆
-            pos = self._read_cursor()
-            if pos is not None:
-                self._last_mouse = pos
-            return
+        now = time.perf_counter()
         pos = self._read_cursor()
         if pos is None:
+            return
+        # Raw / 钩子活跃：只对齐坐标，不推摇杆
+        if now < self._raw_until or now < self._hook_until:
+            self._last_mouse = pos
             return
         if self._last_mouse is None:
             self._last_mouse = pos
@@ -157,8 +182,6 @@ class InputHook:
         dx = pos[0] - self._last_mouse[0]
         dy = pos[1] - self._last_mouse[1]
         self._last_mouse = pos
-        if dx == 0.0 and dy == 0.0:
-            return
         self._emit_rs(dx, dy)
 
     def _read_cursor(self) -> Optional[Tuple[float, float]]:
@@ -175,6 +198,13 @@ class InputHook:
     def _emit_rs(self, dx: float, dy: float) -> None:
         if self._on_rs_mouse is None:
             return
+        if abs(dx) < _RS_DEADZONE and abs(dy) < _RS_DEADZONE:
+            return
+        # 死区内分量清零，避免单轴噪声拉抖
+        if abs(dx) < _RS_DEADZONE:
+            dx = 0.0
+        if abs(dy) < _RS_DEADZONE:
+            dy = 0.0
         if dx == 0.0 and dy == 0.0:
             return
         sens = max(_RS_SENS, 1.0)
@@ -241,4 +271,5 @@ class InputHook:
         dx = fx - self._last_mouse[0]
         dy = fy - self._last_mouse[1]
         self._last_mouse = (fx, fy)
+        self._hook_until = time.perf_counter() + _HOOK_PRIORITY_S
         self._emit_rs(dx, dy)

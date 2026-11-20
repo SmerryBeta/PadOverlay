@@ -6,24 +6,33 @@ PadOverlay — 键盘/鼠标 → 手柄按键高亮（仅可视化）
 
 运行：
     python main.py
+
+控制台 Ctrl+C 可退出。
 """
 from __future__ import annotations
 
+import signal
 import sys
 from pathlib import Path
 
 # 保证以脚本方式运行时可 import 包
-ROOT = Path(__file__).resolve().parent
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+_BOOT = Path(__file__).resolve().parent
+if str(_BOOT) not in sys.path:
+    sys.path.insert(0, str(_BOOT))
 
-from PyQt5.QtCore import Qt
+from app_paths import ROOT, ensure_sidecar_assets
+
+# 打包 exe：旁路没有 config/skins 时先从内嵌资源拷出
+ensure_sidecar_assets()
+
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import QApplication, QMessageBox, QSystemTrayIcon, QWidget
 
 from display.overlay import OverlayWindow
 from listen.input_hook import InputHook
 from mapping.mapper import KeyMapper
 from mapping.pad_state import PadState
+from ui.app_icon import apply_native_window_icon, configure_windows_app_id, make_app_icon
 from ui.settings import SettingsWindow
 from ui.tray import AppTray
 
@@ -31,6 +40,8 @@ from ui.tray import AppTray
 class App:
     def __init__(self, qt: QApplication) -> None:
         self.qt = qt
+        self._quitting = False
+        self._cleaned = False
         self.mapper = KeyMapper()
         self.state = PadState()
         self.overlay = OverlayWindow(self.state)
@@ -39,6 +50,8 @@ class App:
         self.overlay.close_requested.connect(self.quit)
         self.overlay.show()
         self.overlay.apply_saved_position()
+        # show 之后 HWND 才就绪，再打一次 WM_SETICON 给任务栏
+        apply_native_window_icon(self.overlay)
 
         # 独立 Raw Input 接收窗（分层透明 Tool 窗在全屏游戏下经常收不到 WM_INPUT）
         self._raw_sink = QWidget()
@@ -109,6 +122,7 @@ class App:
         self._settings.show()
         self._settings.raise_()
         self._settings.activateWindow()
+        apply_native_window_icon(self._settings)
 
     def _begin_capture(self, cb) -> None:
         self.hook.set_capture_callback(cb)
@@ -121,16 +135,35 @@ class App:
         self.hook.set_keymap(self.mapper.snapshot())
 
     def quit(self) -> None:
+        """✕ / 托盘 / Ctrl+C：先结束事件循环，钩子在后台卸（防卡死）。"""
+        if self._quitting:
+            return
+        self._quitting = True
+        try:
+            self.overlay.close_requested.disconnect(self.quit)
+        except Exception:
+            pass
+        # 先停轮询，避免退出过程中还在摸钩子
+        try:
+            self.overlay.set_mouse_poll(None)
+        except Exception:
+            pass
+        QTimer.singleShot(0, self._finish_quit)
+
+    def _finish_quit(self) -> None:
         self._cleanup()
         self.qt.quit()
 
     def _cleanup(self) -> None:
+        if self._cleaned:
+            return
+        self._cleaned = True
         try:
             self.overlay._persist_now()
         except Exception:
             pass
         try:
-            self.hook.stop()
+            self.hook.stop_async(timeout=1.0)
         except Exception:
             pass
         try:
@@ -145,9 +178,30 @@ class App:
 
 
 def main() -> int:
+    # 先于 QApplication：否则任务栏仍显示 python.exe 图标
+    configure_windows_app_id()
+
     qt = QApplication(sys.argv)
     qt.setApplicationName("PadOverlay")
-    App(qt)
+    # 与托盘同一套图标 → 任务栏 / Alt+Tab / 直播姬窗口列表
+    qt.setWindowIcon(make_app_icon())
+
+    # Qt 事件循环里要定期回到 Python，Ctrl+C 的 signal 才能被处理
+    _sig_pump = QTimer()
+    _sig_pump.setInterval(200)
+    _sig_pump.timeout.connect(lambda: None)
+    _sig_pump.start()
+
+    app = App(qt)
+
+    def _on_sigint(*_args) -> None:
+        print("\n[PadOverlay] Ctrl+C，退出中…", flush=True)
+        QTimer.singleShot(0, app.quit)
+
+    signal.signal(signal.SIGINT, _on_sigint)
+    if hasattr(signal, "SIGBREAK"):
+        signal.signal(signal.SIGBREAK, _on_sigint)
+
     return qt.exec_()
 
 

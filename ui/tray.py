@@ -3,24 +3,12 @@ from __future__ import annotations
 
 from typing import Callable
 
-from PyQt5.QtGui import QColor, QIcon, QPainter, QPixmap
 from PyQt5.QtWidgets import QAction, QMenu, QSystemTrayIcon
 
+from ui.app_icon import make_app_icon
 
-def make_tray_icon() -> QIcon:
-    """生成简易手柄风格托盘图标（无外部资源）。"""
-    pm = QPixmap(64, 64)
-    pm.fill(QColor(0, 0, 0, 0))
-    p = QPainter(pm)
-    p.setRenderHint(QPainter.Antialiasing, True)
-    p.setBrush(QColor(40, 44, 52))
-    p.setPen(QColor(0, 220, 200))
-    p.drawRoundedRect(6, 18, 52, 32, 12, 12)
-    p.setBrush(QColor(0, 220, 200))
-    p.drawEllipse(16, 28, 10, 10)
-    p.drawEllipse(38, 28, 10, 10)
-    p.end()
-    return QIcon(pm)
+# 兼容旧 import
+make_tray_icon = make_app_icon
 
 
 class AppTray:
@@ -34,7 +22,7 @@ class AppTray:
         overlay_visible: bool = True,
         drag_locked: bool = False,
     ) -> None:
-        self.tray = QSystemTrayIcon(make_tray_icon())
+        self.tray = QSystemTrayIcon(make_app_icon())
         self.tray.setToolTip("PadOverlay")
 
         menu = QMenu()

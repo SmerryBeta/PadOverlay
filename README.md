@@ -1,8 +1,10 @@
-# PadOverlay
+# PadOverlay 假装用手柄玩游戏
 
 键盘 / 鼠标操作 → Xbox 手柄按键高亮悬浮窗（**只可视化，不注入虚拟手柄**）。
 
-默认带《猛兽派对》键位（出拳 R、表情 T / 动作 G 轮盘等）；可在设置里点手柄键再录键盘改映射。
+<img width="956" height="820" alt="f860eeaa-885f-456d-98ed-e1db548e8287" src="https://github.com/user-attachments/assets/fac1a08a-84f2-4e5c-a2da-eb8fd296aa95" />
+
+默认带《猛兽派对》键位（出拳 R、表情 T / 动作 G 轮盘等）；如果你要在别的游戏使用，可在设置里点手柄键再录键盘改映射。
 鼠标移动始终驱动右摇杆高亮（镜头 / 轮盘选向）；停下后回中。
 Windows 下用 Raw Input 读相对位移，游戏锁光标/全屏也能跟上（不要用屏幕坐标差分）。
 

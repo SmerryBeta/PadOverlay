@@ -30,6 +30,9 @@ secrets.json
 Thumbs.db
 Desktop.ini
 
+# Skin import intermediates (source sheets / previews)
+skins/**/_*.png
+
 # Local / debug
 tmp/
 *.log

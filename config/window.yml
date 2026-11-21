@@ -1,6 +1,6 @@
 # 悬浮窗状态（缩放/位置自动写入；skin 为当前皮肤 id）
 
-scale: 0.8061
-skin: neon_pad
-x: 257
-y: 295
+scale: 1.0461
+skin: vicksy_pad
+x: 1110
+y: 333

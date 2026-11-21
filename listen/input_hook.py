@@ -118,6 +118,11 @@ class InputHook:
 
     def stop(self) -> None:
         """释放钩子；可能阻塞，调用方宜放后台线程并加超时。"""
+        self._stop_qt_side()
+        self._stop_hooks()
+
+    def _stop_qt_side(self) -> None:
+        """Raw Input / 回调：须在 Qt 主线程调用。"""
         if self._on_rs_mouse is not None:
             try:
                 self._on_rs_mouse(None, None)
@@ -131,6 +136,9 @@ class InputHook:
                 raw.stop()
             except Exception:
                 pass
+
+    def _stop_hooks(self) -> None:
+        """keyboard / pynput：可能卡很久，宜放后台。"""
         kb = self._kb_hook
         self._kb_hook = None
         if keyboard is not None and kb is not None:
@@ -149,20 +157,26 @@ class InputHook:
             except Exception:
                 pass
 
-    def stop_async(self, timeout: float = 1.2) -> None:
-        """在守护线程里 stop，避免 pynput/keyboard 卡死 UI 退出。"""
+    def stop_async(self, timeout: float = 1.0) -> None:
+        """主线程先卸 Qt 侧，钩子在守护线程卸，避免卡死 / 跨线程碰 Qt。
+
+        调用方应先藏窗再调本方法：等卸钩时用户已看不到窗口。
+        timeout<=0：只启动后台卸钩并立即返回；>0 则最多等 timeout 秒。
+        """
         import threading
 
+        self._stop_qt_side()
         done = threading.Event()
 
         def _run() -> None:
             try:
-                self.stop()
+                self._stop_hooks()
             finally:
                 done.set()
 
         threading.Thread(target=_run, name="hook-stop", daemon=True).start()
-        done.wait(timeout=timeout)
+        if timeout > 0:
+            done.wait(timeout=timeout)
 
     def poll_cursor(self) -> None:
         """由悬浮窗定时器调用：仅在钩子/Raw 静默时作兜底，避免与钩子双计导致抖动。"""

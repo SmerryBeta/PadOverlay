@@ -135,7 +135,7 @@ class App:
         self.hook.set_keymap(self.mapper.snapshot())
 
     def quit(self) -> None:
-        """✕ / 托盘 / Ctrl+C：先结束事件循环，钩子在后台卸（防卡死）。"""
+        """✕ / 托盘 / Ctrl+C：先秒关窗口，再后台卸钩子结束事件循环。"""
         if self._quitting:
             return
         self._quitting = True
@@ -146,6 +146,20 @@ class App:
         # 先停轮询，避免退出过程中还在摸钩子
         try:
             self.overlay.set_mouse_poll(None)
+        except Exception:
+            pass
+        # 立刻藏窗/托盘，卸钩子可能要几百毫秒～数秒，不能挡在视觉关闭前面
+        try:
+            self.overlay.hide()
+        except Exception:
+            pass
+        try:
+            if self._settings is not None:
+                self._settings.hide()
+        except Exception:
+            pass
+        try:
+            self.tray.hide()
         except Exception:
             pass
         QTimer.singleShot(0, self._finish_quit)
@@ -162,6 +176,7 @@ class App:
             self.overlay._persist_now()
         except Exception:
             pass
+        # 窗口已藏，这里等卸钩不影响观感；仍限时，防 keyboard/pynput 卡死退出
         try:
             self.hook.stop_async(timeout=1.0)
         except Exception:

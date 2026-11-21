@@ -1,0 +1,106 @@
+# 手柄按键布局 — 可用设置页「布置布局」拖拽保存，也可手改本文件
+# 改完后点设置里「重载布局」或重启生效
+
+canvas:
+  w: 464
+  h: 298
+  base_x: 59.1
+  base_y: 58.0
+  base_scale: 0.751
+  base_rot: 0.0
+parts:
+  lt:
+    type: bumper
+    x: 120.3
+    y: 4.1
+    w: 86
+    h: 79
+    label: LT
+    scale: 0.683
+  rt:
+    type: bumper
+    x: 281.5
+    y: 4.1
+    w: 86
+    h: 79
+    label: RT
+    scale: 0.683
+  lb:
+    type: bumper
+    x: 53.1
+    y: 52.9
+    w: 104
+    h: 44
+    label: LB
+    scale: 0.624
+  rb:
+    type: bumper
+    x: 345.7
+    y: 54.9
+    w: 104
+    h: 42
+    label: RB
+    scale: 0.621
+  btn_y:
+    type: face
+    x: 321.8
+    y: 105.7
+    r: 28
+    label: Y
+    scale: 0.515
+  btn_x:
+    type: face
+    x: 300.0
+    y: 124.1
+    r: 28
+    label: X
+    scale: 0.514
+  btn_b:
+    type: face
+    x: 341.6
+    y: 125.1
+    r: 28
+    label: B
+    scale: 0.514
+  btn_a:
+    type: face
+    x: 321.8
+    y: 144.4
+    r: 28
+    label: A
+    scale: 0.468
+  btn_view:
+    type: small
+    x: 204.5
+    y: 123.1
+    r: 31
+    scale: 0.351
+  btn_menu:
+    type: small
+    x: 256.4
+    y: 122.0
+    r: 33
+    scale: 0.351
+  guide:
+    type: guide
+    x: 231.5
+    y: 106.8
+    r: 10
+  ls:
+    type: stick
+    x: 143.2
+    y: 124.1
+    r: 37
+    scale: 0.751
+  rs:
+    type: stick
+    x: 275.1
+    y: 174.9
+    r: 36
+    scale: 0.826
+  dpad:
+    type: dpad
+    x: 188.8
+    y: 177.0
+    arm: 39
+    scale: 0.751

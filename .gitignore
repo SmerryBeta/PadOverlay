@@ -32,6 +32,8 @@ Desktop.ini
 
 # Skin import intermediates (source sheets / previews)
 skins/**/_*.png
+skins/*.zip
+*.zip
 
 # Local / debug
 tmp/

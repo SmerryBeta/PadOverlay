@@ -10,11 +10,9 @@ from PyQt5.QtGui import QImage, qAlpha, qBlue, qGreen, qRed, qRgba
 from PyQt5.QtWidgets import QApplication
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = Path(
-    r"C:\Users\30724\.cursor\projects\s-pyProjects-PadOverlay\assets"
-    r"\____Xbox_______-e6668979-aa90-4478-b760-184edca2c991.png"
-)
 OUT = ROOT / "skins" / "calico_pad"
+# 默认用皮肤目录内 org.png；也可: python tools/import_calico_skin.py <拼图路径>
+SRC = Path(sys.argv[1]) if len(sys.argv) > 1 else OUT / "org.png"
 
 Box = Tuple[int, int, int, int]
 

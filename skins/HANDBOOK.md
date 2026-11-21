@@ -229,4 +229,5 @@ canvas:
 | `vector_default` | 矢量线稿 |
 | `drawn_pad` | 程序化示例图 |
 | `neon_pad` | Neon 拼图（**布局参考基准**） |
-| `calico_pad` | 猫纹拼图 |
+| `sakura_pad` | 樱花拼图 |
+| `vicksy_pad` | Vicksy |

@@ -8,7 +8,8 @@ skins/
   vector_default/          # 矢量线稿
   drawn_pad/               # 程序化示例
   neon_pad/                # Neon（布局参考）
-  calico_pad/              # 猫纹主题
+  sakura_pad/              # 樱花主题
+  vicksy_pad/              # Vicksy
   _template/               # 复制改名用模板
 ```
 
@@ -22,7 +23,7 @@ skin.yml + layout.yml + base.png + active/ + inactive/
 
 重生成示例：
 
-- 猫纹：`python tools/import_calico_skin.py`
+- 樱花：`python tools/import_sakura_skin.py`
 - Neon：`python tools/import_ps_skin.py`
 - 矢量贴图样例：`python tools/gen_drawn_pad_skin.py`
 
